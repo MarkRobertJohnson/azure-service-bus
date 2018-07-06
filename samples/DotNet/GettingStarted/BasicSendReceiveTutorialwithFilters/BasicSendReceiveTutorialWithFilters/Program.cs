@@ -2,6 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BasicSendReceiveTutorialWithFilters
 {
@@ -160,8 +161,14 @@ namespace BasicSendReceiveTutorialWithFilters
                 foreach (var subscription in Subscriptions)
                 {
                     SubscriptionClient s = new SubscriptionClient(ServiceBusConnectionString, TopicName, subscription);
-                    await s.RemoveRuleAsync(RuleDescription.DefaultRuleName);
-                    Console.WriteLine($"Default filter for {subscription} has been removed.");
+                    var rules = (await s.GetRulesAsync()).Where(r => r.Name == RuleDescription.DefaultRuleName);
+                    if(rules.Any())
+                    {
+                        await s.RemoveRuleAsync(RuleDescription.DefaultRuleName);
+                        Console.WriteLine($"Default filter for {subscription} has been removed.");
+                    }
+                    
+                    
                     await s.CloseAsync();
                 }
 
